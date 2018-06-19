@@ -29,8 +29,6 @@ import model.Client;
  * @author scavenger
  */
 @Path("clients")
-@Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
 public class ClientResource {
 
     @Context
@@ -48,51 +46,33 @@ public class ClientResource {
      * Retrieves representation of an instance of resources.ClientResource
      * @param start Valor do indice registro inicial
      * @param size valor do tamanho da pagina
+     * @param info
      * @return an instance of model.Client
      */
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
     public List<Client> getAllClients(
         @QueryParam("start") int start,
         @QueryParam("size") int size) {
-        System.out.println("CLIENS START " + start + " CLIENTS SIZE: " + size);
+        //System.out.println("CLIENS START " + start + " CLIENTS SIZE: " + size);
+        List<Client> list= null;
+        if (start >=0 && size > 0)
+            list = m_dao.getAllWithPaging(start, size);
         
-        if (start >=0 && size > 0){
-            return m_dao.getAllWithPaging(start, size);
-        }
-        
-        return m_dao.getAllWithPaging(0,0);
-        
+        else list = m_dao.getAllWithPaging(0,0);
+        return list;
     }
 
     @GET
     @Path("/{clientId}")
+    @Produces(MediaType.APPLICATION_JSON)
     public Client getClientById(@PathParam("clientId") Long id){
-        System.out.println("PARAMETER: " + id); 
-        Client c = m_dao.getById( id );
-        return c;
-    
-    }
-    /**
-     * PUT method for updating or creating an instance of ClientResource
-     * @param id
-     * @param content representation for the resource
-     * @return 
-     */
-    @PUT
-    @Path("{clientId}")
-    public Client updateClient(@PathParam("clientId") long id, Client content) {
-       content.setId(id);
-       return m_dao.update(content);
-    }
-    
-    @DELETE
-    @Path("{clientId}")
-    public void delete( @PathParam("clientId") long Id/*, Client content*/){
-        m_dao.remove(Id);
-        
+        return m_dao.getById( id );    
     }
     
     @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response addClient(Client client, @Context UriInfo uriInfo){
         client = m_dao.insert(client);
         String id = String.valueOf( client.getId() );
@@ -101,6 +81,29 @@ public class ClientResource {
         return Response.created(uri)
                 .entity(client)
                 .build();
+    }
+    
+    /**
+     * PUT method for updating or creating an instance of ClientResource
+     * @param id
+     * @param content representation for the resource
+     * @param info
+     * @return 
+     */
+    @PUT
+    @Path("{clientId}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Client updateClient(@PathParam("clientId") long id, Client content) {
+       content.setId(id);
+       m_dao.update(content);
+       return content;
+    }
+    
+    @DELETE
+    @Path("{clientId}")
+    public void delete( @PathParam("clientId") long Id/*, Client content*/){
+        m_dao.remove(Id);
     }
     
 }

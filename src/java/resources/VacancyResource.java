@@ -45,6 +45,7 @@ public class VacancyResource {
     /**
      * Retrieves representation of an instance of resources.VacancyResource
      * @param id
+     * @param info
      * @return an instance of model.Vacancy
      */
     
@@ -55,49 +56,32 @@ public class VacancyResource {
         return m_dao.getById(id);
     }
 
+    /* REMOVEREMOS A BUSCA DE VAGA PELO ID DO PERFIL!!!!
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public List<Vacancy> getVacancyByPerfilId(@PathParam("perfilId") long id){
-            return m_dao.getByPerfilId(id);
-    }
-    /*
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<Vacancy> getAll(){
-        return m_dao.getAllWithPaging(0,0);
+    public Response getVacancyByPerfilId(@PathParam("perfilId") long id, @Context UriInfo info){
+            URI uri = info.getAbsolutePathBuilder().path( String.valueOf(id)).build();
+            
+            return Response.created(uri)
+                    .entity( m_dao.getByPerfilId(id) ).build();
     }*/
-    /**
-     * Esse é um método DELEGADOR. Qulquer método HTTP que for chamando
-     * por cima da URL {vacancyId}/parkings o método getParkingResource é
-     * chamado e o método HTTP requisitado será tratado pelo novo recurso
-     * retornado.
-     * @param id vacancy id
-     * @return a instance of resources.ParkingResource
-     */
     
-    @Path("{vacancyId}/parkings")
-    public ParkingResource getParkingResource( @PathParam("vacancyId") Long id) {
-        return new ParkingResource();
-    }
     
-    /**
-     * PUT method for updating or creating an instance of VacancyResource
-     * @param id
-     * @param content representation for the resource
-     */
-    @PUT
-    @Path("{vacancyId}")
-    @Consumes(MediaType.APPLICATION_JSON)
-    public void update(@PathParam("vacancyId") long id, Vacancy content) {
-        content.setId(id);
-        m_dao.update(content);
-    }
-    
-    @DELETE
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Path("{vacancyId}")
-    public void delete( @PathParam("vacancyId") long id){
-        m_dao.remove(id);
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<Vacancy> getAll(
+            @Context UriInfo info,
+            @QueryParam("start") int start,
+            @QueryParam("size") int size){
+        
+        List<Vacancy> list = null;
+        
+        if (start >=0 && size > 0)
+            list = m_dao.getAllWithPaging(start, size);
+        else
+            list = m_dao.getAllWithPaging(0, 0);
+        
+        return list;
     }
     
     @POST
@@ -111,6 +95,45 @@ public class VacancyResource {
         return Response.created(uri)
                 .entity(vacancy)
                 .build();
+    }
+    
+    
+    /**
+     * PUT method for updating or creating an instance of VacancyResource
+     * @param id
+     * @param content representation for the resource
+     * @param info
+     * @return 
+     */
+    @PUT
+    @Path("{vacancyId}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Vacancy update(@PathParam("vacancyId") long id, Vacancy content, @Context UriInfo info) {
+        content.setId(id);
+        m_dao.update(content);
+        return content;
+    }
+    
+    @DELETE
+    @Path("{vacancyId}")
+    public void delete( @PathParam("vacancyId") long id){
+        m_dao.remove(id);
+    }
+    
+    
+    /**
+     * Esse é um método DELEGADOR. Qulquer método HTTP que for chamando
+     * por cima da URL {vacancyId}/parkings o método getParkingResource é
+     * chamado e o método HTTP requisitado será tratado pelo novo recurso
+     * retornado.
+     * @param id vacancy id
+     * @return a instance of resources.ParkingResource
+     */
+    
+    @Path("{vacancyId}/parkings")
+    public ParkingResource getParkingResource( @PathParam("vacancyId") Long id) {
+        return new ParkingResource();
     }
     
 }

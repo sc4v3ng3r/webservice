@@ -79,26 +79,6 @@ public class VehiclesResource {
         return m_dao.getById(id);
     }
     
-    /**
-     * PUT method for updating or creating an instance of VehiclesResource
-     * @param content representation for the resource
-     */
-    @PUT
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Path("{vehicleId}")
-    public Response putJson(@PathParam("vehicleId") long id, Vehicle content, @Context UriInfo info) {
-        content.setId(id);
-        m_dao.update(content);
-        URI uri = info.getAbsolutePathBuilder().path( String.valueOf(id)).build();
-        return Response.created(uri).entity( content ).build();
-    }
-    
-    @DELETE
-    @Path("{vehicleId}")
-    public void delete(@PathParam("vehicleId") long id){
-        m_dao.remove(id);
-    }
-    
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -109,4 +89,25 @@ public class VehiclesResource {
         
         return Response.created(uri).entity( vehicle).build();
     }
+    /**
+     * PUT method for updating or creating an instance of VehiclesResource
+     * @param id
+     * @param content representation for the resource
+     * @return 
+     */
+    @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("{vehicleId}")
+    public Vehicle putJson(@PathParam("vehicleId") long id, Vehicle content) {
+        content.setId(id);
+        m_dao.update(content);
+        return content;
+    }
+    
+    @DELETE
+    @Path("{vehicleId}")
+    public void delete(@PathParam("vehicleId") long id){
+        m_dao.remove(id);
+    }
+    
 }

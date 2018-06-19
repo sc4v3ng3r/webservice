@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import model.Client;
-import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -59,7 +58,7 @@ public class ClientDAO implements Dao<Client>{
     
     @Override
     public void remove(long id){
-        String SQL = "DELETE FROM cliente where id = :clientId";
+        String SQL = "DELETE FROM client where id = :clientId";
         try{
             m_session = HibernateUtil.getSessionFactory().openSession();
             m_transaction = m_session.beginTransaction();

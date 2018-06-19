@@ -6,18 +6,22 @@
 package resources;
 
 import dao.ParkingDAO;
+import java.net.URI;
 import java.util.List;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.Produces;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PUT;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import model.Parking;
 
 /**
@@ -56,6 +60,7 @@ public class ParkingResource {
      * @param id
      * @return an instance of model.Parking
      */
+    
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public List<Parking> getParkingByVacancyId( 
@@ -63,19 +68,47 @@ public class ParkingResource {
             @DefaultValue("0") @QueryParam("start") int start,
             @DefaultValue("0") @QueryParam("offset") int size){
             
-            if (start >= 0 && size > 0){
-                return m_dao.getByVacancyId(vacancyId,start, size);
-            }
+        List<Parking> list = null; 
             
-            return m_dao.getByVacancyId(vacancyId,0,0);
+        if (start >= 0 && size > 0){
+            list = m_dao.getByVacancyId(vacancyId,start, size);
+        }
+        else 
+          list =  m_dao.getByVacancyId(vacancyId,0,0);
+        
+        return list;
     }
+    
     /**
      * PUT method for updating or creating an instance of ParkingResource
      * @param content representation for the resource
      */
+    
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response addParking(Parking parking, @Context UriInfo info){
+        parking = m_dao.insert(parking);
+        URI uri = info.getAbsolutePathBuilder().path( String.valueOf( parking.getId())).build();
+        
+        return Response.created(uri).entity(parking).build();
+    }
+            
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
-    public void putJson(Parking content) {
+    @Produces(MediaType.APPLICATION_JSON)
+    public Parking putJson(Parking content,
+            @PathParam("vacancyId") long idVacancy,
+            @PathParam("parkingId")long idParking) {
+        
+        content.setId(idParking);
+        m_dao.update(content);
+        return content;
     }
     
+    @DELETE
+    @Consumes(MediaType.APPLICATION_JSON)
+    public void delete(Parking content, @PathParam("parkingId") long id){
+        m_dao.remove(id);
+    }
 }
